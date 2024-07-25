@@ -1,0 +1,20 @@
+﻿<!-- dotnet publish -c Release -r osx-arm64 -o ./publish -->
+
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <Version>0.0.1.0</Version>
+    <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifiers>osx-arm64;osx-x64;win-x64;win-x86</RuntimeIdentifiers>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../InkTesterLib/InkTesterLib.csproj" />
+  </ItemGroup>
+
+</Project>
