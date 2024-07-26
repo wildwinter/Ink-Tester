@@ -22,46 +22,60 @@ If the visit count - or percentage - is zero then the line was never reached, an
 
 If the visit count is low, then hardly any players are going to see that line. Is that what you want? Change your logic, re-run the tests, see if that helps!
 
+### Out-Of-Content Check Mode
+This tool can also be run in **out-of-content check** mode. Instead of recording visits, it specifically hunts for situations which cause an Ink "ran out of content" error, e.g.
+
+`Ink Error: RUNTIME ERROR: 'outofcontent.ink' line 14: ran out of content. Do you need a '-> DONE' or '-> END'?`
+
+If it finds any errors like this it will report them, and write out the places where this happens into a CSV file. **Note that in this mode it doesn't do a normal visit check.**
+
 ## Command-Line Tool
 This is a command-line utility with a few arguments. A few simple examples:
 
-Run the tool on the file Main.ink in the current directory, and output the report.csv file
+Run the tool on the file Main.ink in the current directory, and output the report.csv file.\
 `InkTesterTool.exe --storyFile=Main.ink --csv=report.csv`
 
-Run the tool on the file Main.ink in the subfolder inkFiles, and output the report.csv file to the output folder
+Run the tool on the file Main.ink in the subfolder inkFiles, and output the report.csv file to the output folder.\
 `InkTesterTool.exe --folder=inkFiles/ --storyFile=Main.ink --runs=10000 --csv=output/report.csv`
 
-Set the Ink variable TEST_MODE to true, run the tool on the file Main.ink in the current directory, and output the report.csv file
+Set the Ink variable TEST_MODE to true, run the tool on the file Main.ink in the current directory, and output the report.csv file.\
 `InkTesterTool.exe --storyFile=Main.ink --csv=output/report.csv --testVar=TEST_MODE`
+
+Run an out-of-content check to report.csv instead.\
+`InkTesterTool.exe --storyFile=Main.ink --csv=output/report.csv --ooc`
 
 ### Arguments
 
 * `--folder=<folder>`
-    Folder to act as root folder when testing the Ink. Used for locating include files.
-    e.g. `--folder=inkFiles/` 
+    Folder to act as root folder when testing the Ink. Used for locating include files.\
+    e.g. `--folder=inkFiles/`\
     Default is the current working dir.
 
 * `--storyFile=<file>`
 
-    Ink file to test.
+    Ink file to test.\
     e.g. `--storyFile=start.ink`
 
 * `--csv=<csvFile>`
 
-    Path to a CSV file to export the data to, relative to working dir.
-    e.g. `--csv=output/strings.csv`
+    Path to a CSV file to export the data to, relative to working dir.\
+    e.g. `--csv=output/strings.csv`\
     Default is empty, so no CSV file will be exported.
 
 * `--testVar=<varName>`
 
-    Set this variable in Ink to True. Useful for setting test data in Ink itself. Gives an error if your ink story doesn't define a variable of this name.
+    Set this variable in Ink to True. Useful for setting test data in Ink itself. Gives an error if your ink story doesn't define a variable of this name.\
     e.g. `--testVar=IsTestRunning` assuming that your Ink contains `VAR IsTestRunning=false` normally.
 
 * `--maxSteps=<num>`
 
-    How many steps to allow your ink story to take before ending. This avoids infinite loops and deals with stories that don't have an explicit `->END`.
-    e.g. `--maxSteps=1000`
+    How many steps to allow your ink story to take before ending. This avoids infinite loops and deals with stories that don't have an explicit `->END`.\
+    e.g. `--maxSteps=1000`\
     Default is 10000, to avoid infinite loops - but when using default, an error will be reported and testing will cease. If you specify your own maxSteps, this won't error.
+
+* `--ooc`
+    
+    Run an out-of-content check, instead of the normal coverage check.
 
 * `--help`
 

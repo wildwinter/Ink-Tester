@@ -2,12 +2,12 @@
 test.ink,14,"    We are testing!",0,0.00
 test.ink,18,"Test Line 1",1000,100.00
 test.ink,19,"Test Line 2",1000,100.00
-test.ink,26,"+ Not hidden option.",169,16.90
-test.ink,28,"* [Hidden Option] With Extra Text.",172,17.20
-test.ink,30,"* Another Option [] With Extra Text.",159,15.90
-test.ink,35,"Branch 1",162,16.20
-test.ink,40,"Branch 2",152,15.20
-test.ink,45,"Branch 3",186,18.60
-test.ink,49,"Fancy option branch.",500,50.00
-included1.ink,3,"This is in an included file.",162,16.20
-inc/included2.ink,3,"This is in another included file.",152,15.20
+test.ink,26,"+ Not hidden option.",161,16.10
+test.ink,28,"* [Hidden Option] With Extra Text.",170,17.00
+test.ink,30,"* Another Option [] With Extra Text.",162,16.20
+test.ink,35,"Branch 1",164,16.40
+test.ink,40,"Branch 2",181,18.10
+test.ink,45,"Branch 3",162,16.20
+test.ink,49,"Fancy option branch.",493,49.30
+inc/included2.ink,3,"This is in another included file.",181,18.10
+included1.ink,3,"This is in an included file.",164,16.40

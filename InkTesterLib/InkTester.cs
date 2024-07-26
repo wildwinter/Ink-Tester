@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using Ink;
 using Ink.Runtime;
 
@@ -19,12 +20,17 @@ namespace InkTester
             public int maxSteps = 10000;
             // Treat exceeded maxTurns as an error?
             public bool maxStepsErrors = true;
+            // Running in Out of Content mode
+            public bool ooc = false;
         }
         private Options _options;
 
 
         private IFileHandler _fileHandler = new DefaultFileHandler();
         private bool _inkErrors = false;
+        private int _oocLine = -1;
+        private string _oocFile = "";
+
         private string _previousCWD="";
 
         private Random _random = new Random();
@@ -162,6 +168,8 @@ namespace InkTester
 
                     foreach(var lineNum in lineNums) {
                         // Add to the visit count.
+                        if (!fileVisitLog.ContainsKey(lineNum))
+                            fileVisitLog[lineNum]=0;
                         fileVisitLog[lineNum]=fileVisitLog[lineNum]+1;
                     }
                 }
@@ -180,6 +188,11 @@ namespace InkTester
             Console.WriteLine($"Test run {runNum+1}...");
 
             int steps = 0;
+            
+            // Clear the out-of-content error
+            _oocLine = -1;
+            _oocFile = "";
+
             while (story.canContinue) {
                 
                 while(story.canContinue) {
@@ -197,22 +210,36 @@ namespace InkTester
                     steps++;
 
                     var text = story.Continue();
-                    var tags = story.currentTags;
+                    if (_options.ooc && _oocLine>=0) {
 
-                    // Use the tag we stuck into that line to get the parsed version of the object
-                    // We could have used debugMetadata in runtime but it's flaky in the runtime version and can be wrong
-                    var pObj = tagger.GetParsedObjectFromTags(tags);
-                    if (pObj!=null) {
-
-                        int lineNumber = pObj.debugMetadata.startLineNumber;
-                        string fileName = pObj.debugMetadata.fileName;
-
-                        if (!runVisitLog.ContainsKey(fileName)) {
+                        // We hit an Out of Content error. Log it, bail out early.
+                        if (!runVisitLog.ContainsKey(_oocFile)) {
                             // This file needs adding to the log
                             var newFileVisitLog=new HashSet<int>();
-                            runVisitLog[fileName]=newFileVisitLog;
+                            runVisitLog[_oocFile]=newFileVisitLog;
                         }
-                        runVisitLog[fileName].Add(lineNumber);
+                        runVisitLog[_oocFile].Add(_oocLine);
+                        return true;
+                    }
+
+
+                    if (!_options.ooc) {    // Skip if we're doing an OOC run
+                        var tags = story.currentTags;
+                        // Use the tag we stuck into that line to get the parsed version of the object
+                        // We could have used debugMetadata in runtime but it's flaky in the runtime version and can be wrong
+                        var pObj = tagger.GetParsedObjectFromTags(tags);
+                        if (pObj!=null) {
+
+                            int lineNumber = pObj.debugMetadata.startLineNumber;
+                            string fileName = pObj.debugMetadata.fileName;
+
+                            if (!runVisitLog.ContainsKey(fileName)) {
+                                // This file needs adding to the log
+                                var newFileVisitLog=new HashSet<int>();
+                                runVisitLog[fileName]=newFileVisitLog;
+                            }
+                            runVisitLog[fileName].Add(lineNumber);
+                        }
                     }
 
                     if (_inkErrors)
@@ -242,6 +269,23 @@ namespace InkTester
                 Console.Error.WriteLine("Ink Warning: "+message);
                 return;
             }
+            if (message.Contains("ran out of content.") && _options.ooc){
+
+                string pattern = @"'(?<filename>.+)' line (?<lineNumber>\d+):";
+        
+                // Use Regex to match the pattern in the error message
+                Regex regex = new Regex(pattern);
+                Match match = regex.Match(message);
+
+                if (match.Success)
+                {
+                    // Extract the filename and line number from the match groups
+                    _oocFile = match.Groups["filename"].Value;
+                    _oocLine = int.Parse(match.Groups["lineNumber"].Value);
+
+                    return; // Don't treat it as an error, return to the loop which will log it and exit the run.
+                }
+            }
             _inkErrors = true;
             Console.Error.WriteLine("Ink Error: "+message);
         }
@@ -268,6 +312,9 @@ namespace InkTester
                     int lineNumber = lineKvp.Key;
                     int lineCount = lineKvp.Value;
 
+                    if (_options.ooc && lineCount==0)
+                        continue;
+
                     if (!_buildFileContent.ContainsKey(fileName)) {
                         var content = _fileHandler.LoadInkFileContents(fileName);
                         _buildFileContent[fileName] = content.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
@@ -281,7 +328,7 @@ namespace InkTester
                         LineNumber = lineNumber,
                         Text = lines[lineNumber-1],
                         Visits = lineCount,
-                        PercentageVisits = ((float)lineCount * 100.0f / (float)_options.testRuns)
+                        PercentageVisits = (float)lineCount * 100.0f / (float)_options.testRuns
                     };
                     VisitLog.Add(visitEntry);
                 }

@@ -16,6 +16,8 @@ foreach (var arg in args)
         options.testRuns = int.Parse(arg.Substring(7));
     else if (arg.StartsWith("--csv="))
         csvOptions.outputFilePath = arg.Substring(6);
+    else if (arg.StartsWith("--ooc"))
+        options.ooc=true;
     else if (arg.StartsWith("--maxSteps=")) {
         options.maxSteps = int.Parse(arg.Substring(11));
         options.maxStepsErrors = false; // Changing the default stops this being reported as an error.
@@ -39,12 +41,15 @@ foreach (var arg in args)
         Console.WriteLine("  --maxSteps=<num> - How many steps to allow your ink story to take before ending. This avoids infinite loops and deals with stories that don't have an explicit ->END.");
         Console.WriteLine("                    e.g. --maxSteps=1000");
         Console.WriteLine("                    Default is 10000, to avoid infinite loops - but when using default, an error will be reported and testing will cease. If you specify your own maxSteps, this won't error.");
+        Console.WriteLine("  --ooc - Run an out-of-content check, instead of the normal coverage check.");
+  
         return 0;
     }
     else if (arg.Equals("--test")) { // Internal testing, for dev. Not to be confused with testVar.
         options.folder="tests";
         options.storyFile="test.ink";
         options.testRuns = 1000;
+        //options.ooc = true;
         //options.maxSteps = 1000;
         //options.maxStepsErrors = false;
         //options.testVar = "Testing";
@@ -53,6 +58,12 @@ foreach (var arg in args)
 }
 
 // ----- Test Ink -----
+if (options.ooc) {
+    Console.WriteLine("Starting out-of-content test.");
+} else {
+    Console.WriteLine("Starting coverage test.");
+}
+
 var tester = new Tester(options);
 if (!tester.Run()) {
     Console.Error.WriteLine("Tests not completed.");
@@ -60,10 +71,19 @@ if (!tester.Run()) {
 }
 Console.WriteLine($"Tested.");
 
+if (options.ooc) {
+    if (tester.VisitLog.Count==0) {
+        Console.WriteLine("No out-of-content errors found, all good! Report not written.");
+        return 0;
+    }
+    Console.WriteLine($"{tester.VisitLog.Count} out-of-content errors found! See report.");
+}
+
 // ----- CSV Output -----
 if (!String.IsNullOrEmpty(csvOptions.outputFilePath)) {
     var csvHandler = new CSVHandler(tester, csvOptions);
-    if (!csvHandler.WriteReport()) {
+
+    if (!csvHandler.WriteReport(options.ooc)) {
         Console.Error.WriteLine("Report not written.");
         return -1;
     }
