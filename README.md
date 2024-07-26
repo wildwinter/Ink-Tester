@@ -56,6 +56,12 @@ Set the Ink variable TEST_MODE to true, run the tool on the file Main.ink in the
     Set this variable in Ink to True. Useful for setting test data in Ink itself. Gives an error if your ink story doesn't define a variable of this name.
     e.g. `--testVar=IsTestRunning` assuming that your Ink contains `VAR IsTestRunning=false` normally.
 
+* `--maxSteps=<num>`
+
+    How many steps to allow your ink story to take before ending. This avoids infinite loops and deals with stories that don't have an explicit `->END`.
+    e.g. `--maxSteps=1000`
+    Default is 10000, to avoid infinite loops - but when using default, an error will be reported and testing will cease. If you specify your own maxSteps, this won't error.
+
 * `--help`
 
     This help!

@@ -15,6 +15,10 @@ namespace InkTester
             public int testRuns = 1000;
             // If set, sets a variable called this to TRUE before running each test.
             public string testVar = "";
+            // Max number of TURNS() allowed in a single story run.
+            public int maxSteps = 10000;
+            // Treat exceeded maxTurns as an error?
+            public bool maxStepsErrors = true;
         }
         private Options _options;
 
@@ -147,9 +151,23 @@ namespace InkTester
 
             Console.WriteLine($"Test run {runNum+1}...");
 
+            int steps = 0;
             while (story.canContinue) {
                 
                 while(story.canContinue) {
+                    
+                    if (steps>=_options.maxSteps) {
+                        if (_options.maxStepsErrors) {
+                            Console.Error.WriteLine("Exceeded max steps!");
+                            return false;
+                        }
+                        else {
+                            Console.WriteLine("Exceeded specified max steps - halting run.");
+                            return true;
+                        }
+                    }
+                    steps++;
+
                     var text = story.Continue();
                     var tags = story.currentTags;
 

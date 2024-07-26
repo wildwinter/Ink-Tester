@@ -16,6 +16,10 @@ foreach (var arg in args)
         options.testRuns = int.Parse(arg.Substring(7));
     else if (arg.StartsWith("--csv="))
         csvOptions.outputFilePath = arg.Substring(6);
+    else if (arg.StartsWith("--maxSteps=")) {
+        options.maxSteps = int.Parse(arg.Substring(11));
+        options.maxStepsErrors = false; // Changing the default stops this being reported as an error.
+    }
     else if (arg.Equals("--help") || arg.Equals("-h")) {
         Console.WriteLine("Ink Tester");
         Console.WriteLine("Arguments:");
@@ -32,12 +36,17 @@ foreach (var arg in args)
         Console.WriteLine("                    Default is empty, so no CSV file will be generated.");
         Console.WriteLine("  --testVar=<varName> - Set this variable to TRUE. Useful for setting test data in Ink.");
         Console.WriteLine("                        e.g. --testVar=Testing");
+        Console.WriteLine("  --maxSteps=<num> - How many steps to allow your ink story to take before ending. This avoids infinite loops and deals with stories that don't have an explicit ->END.");
+        Console.WriteLine("                    e.g. --maxSteps=1000");
+        Console.WriteLine("                    Default is 10000, to avoid infinite loops - but when using default, an error will be reported and testing will cease. If you specify your own maxSteps, this won't error.");
         return 0;
     }
     else if (arg.Equals("--test")) { // Internal testing, for dev. Not to be confused with testVar.
         options.folder="tests";
         options.storyFile="test.ink";
         options.testRuns = 1000;
+        //options.maxSteps = 1000;
+        //options.maxStepsErrors = false;
         //options.testVar = "Testing";
         csvOptions.outputFilePath="tests/report.csv";
     }
@@ -46,7 +55,7 @@ foreach (var arg in args)
 // ----- Test Ink -----
 var tester = new Tester(options);
 if (!tester.Run()) {
-    Console.Error.WriteLine("Not tested.");
+    Console.Error.WriteLine("Tests not completed.");
     return -1;
 }
 Console.WriteLine($"Tested.");

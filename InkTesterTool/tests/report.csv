@@ -1,9 +1,3 @@
 ﻿File,Line,Text,Visit Count,Visit %
-test.ink,14,"    We are testing!",0,0.00
-test.ink,18,"Test Line 1",1000,100.00
-test.ink,19,"Test Line 2",1000,100.00
-test.ink,30,"Branch 1",260,26.00
-test.ink,35,"Branch 2",266,26.60
-test.ink,40,"Branch 3",474,47.40
-included1.ink,3,"This is in an included file.",260,26.00
-inc/included2.ink,3,"This is in another included file.",266,26.60
+infinite.ink,4,"Do something.",500000,50000.00
+infinite.ink,6,"And then, foolishly, do it again.",500000,50000.00
