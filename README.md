@@ -80,6 +80,10 @@ won't be on the spreadsheet, but
 `* Choose This Line`
 will be.
 
+**How does it calculate the visit count?**
+
+For each run, the tool simply records if a line has been visited or not. Then it aggregates that data over all the runs. If you visit a line multiple times in one run, that's still only counted as - yep, visited.
+
 ## Caveats
 This isn't very complicated or sophisticated, so your mileage may vary!
 

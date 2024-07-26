@@ -134,9 +134,37 @@ namespace InkTester
                     }
                 }
 
+                Dictionary<string, HashSet<int>> runVisitLog = new();
+
                 // Do a test run!
-                if (!TestRun(story, tagger, runNum))
+                if (!TestRun(story, tagger, runNum, runVisitLog))
                     return false;
+
+                // Add that run log to the main log
+                foreach (var kvp in runVisitLog) {
+                    var fileName = kvp.Key;
+                    var lineNums = kvp.Value;
+
+                    if (!_visitWorkingLog.ContainsKey(fileName)) {
+                        // This file needs adding to the log
+                        var newFileVisitLog=new Dictionary<int, int>();
+                        _visitWorkingLog[fileName]=newFileVisitLog;
+
+                        // Fetch from the tag parser a list of all lines we care about for this file
+                        // And set their visit count to 0
+                        var expectedLineNums = tagger.GetLineNumsForFile(fileName);
+                        foreach(var lineNum in expectedLineNums) {
+                            newFileVisitLog[lineNum]=0;
+                        }
+                    }
+                    
+                    var fileVisitLog = _visitWorkingLog[fileName];
+
+                    foreach(var lineNum in lineNums) {
+                        // Add to the visit count.
+                        fileVisitLog[lineNum]=fileVisitLog[lineNum]+1;
+                    }
+                }
             }
 
             // Take what we've learned and build it into a simple log.
@@ -147,7 +175,7 @@ namespace InkTester
             return true;
         }
 
-        private bool TestRun(Story story, LineTagger tagger, int runNum) {
+        private bool TestRun(Story story, LineTagger tagger, int runNum, Dictionary<string, HashSet<int>> runVisitLog) {
 
             Console.WriteLine($"Test run {runNum+1}...");
 
@@ -179,21 +207,12 @@ namespace InkTester
                         int lineNumber = pObj.debugMetadata.startLineNumber;
                         string fileName = pObj.debugMetadata.fileName;
 
-                        if (!_visitWorkingLog.ContainsKey(fileName)) {
+                        if (!runVisitLog.ContainsKey(fileName)) {
                             // This file needs adding to the log
-                            var newFileVisitLog=new Dictionary<int, int>();
-                            _visitWorkingLog[fileName]=newFileVisitLog;
-
-                            // Fetch from the tag parser a list of all lines we care about for this file
-                            // And set their visit count to 0
-                            var lineNums = tagger.GetLineNumsForFile(fileName);
-                            foreach(var lineNum in lineNums) {
-                                newFileVisitLog[lineNum]=0;
-                            }
+                            var newFileVisitLog=new HashSet<int>();
+                            runVisitLog[fileName]=newFileVisitLog;
                         }
-                        // Add to the visit count.
-                        var fileVisitLog = _visitWorkingLog[fileName];
-                        fileVisitLog[lineNumber]=fileVisitLog[lineNumber]+1;
+                        runVisitLog[fileName].Add(lineNumber);
                     }
 
                     if (_inkErrors)
