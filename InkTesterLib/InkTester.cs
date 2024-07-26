@@ -236,6 +236,12 @@ namespace InkTester
 
         void OnError(string message, ErrorType type)
         {
+            if (type==ErrorType.Author)
+                return;
+            if (type==ErrorType.Warning) {
+                Console.Error.WriteLine("Ink Warning: "+message);
+                return;
+            }
             _inkErrors = true;
             Console.Error.WriteLine("Ink Error: "+message);
         }

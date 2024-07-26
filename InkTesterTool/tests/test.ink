@@ -1,4 +1,4 @@
-﻿INCLUDE included1.ink
+INCLUDE included1.ink
 INCLUDE inc/included2.ink
 
 VAR TEST_RUN = false
@@ -30,6 +30,7 @@ Test Line 2
 * Another Option [] With Extra Text.
     -> OptionBranch
 
+TODO: Does this work?
 === Branch1
 Branch 1
 -> IncludedStuff ->
