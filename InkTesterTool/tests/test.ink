@@ -23,8 +23,12 @@ Test Line 2
     -> Branch2
 * [Branch 3]
     -> Branch3
-* Branch 4
-    -> Branch3
++ Not hidden option.
+    -> OptionBranch
+* [Hidden Option] With Extra Text.
+    -> OptionBranch
+* Another Option [] With Extra Text.
+    -> OptionBranch
 
 === Branch1
 Branch 1
@@ -38,4 +42,8 @@ Branch 2
 
 === Branch3
 Branch 3
+-> END
+
+=== OptionBranch
+Fancy option branch.
 -> END

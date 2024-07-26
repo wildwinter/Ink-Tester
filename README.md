@@ -6,6 +6,7 @@
 - [Overview](#overview)
 - [Command-Line Tool](#command-line-tool)
 - [Releases](#releases)
+- [FAQ](#faq)
 - [Caveats](#caveats)
 - [Under the Hood](#under-the-hood)
 - [Acknowledgements](#acknowledgements)
@@ -66,10 +67,18 @@ Set the Ink variable TEST_MODE to true, run the tool on the file Main.ink in the
 
     This help!
 
-
 ## Releases
 You can find releases for various platforms [here](https://github.com/wildwinter/Ink-Tester/releases
 ).
+
+## FAQ
+**What kind of lines are shown?**
+    
+All printable text lines should be shown. Note that means choices that only consist of hidden content won't be in the spreadsheet e.g. 
+`* [Choose This Line]`
+won't be on the spreadsheet, but
+`* Choose This Line`
+will be.
 
 ## Caveats
 This isn't very complicated or sophisticated, so your mileage may vary!

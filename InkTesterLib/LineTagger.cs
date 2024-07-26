@@ -33,7 +33,7 @@ namespace InkTester
                     continue;
 
                 // If it's a choice, ignore
-                if (IsChoice(text))
+                if (IsHiddenInChoice(text))
                     continue;
 
                 // Is this inside some code? In which case we can't do anything with that.
@@ -114,10 +114,15 @@ namespace InkTester
             return (inTag>0);
         }
 
-        private bool IsChoice(Text text) {
+        private bool IsHiddenInChoice(Text text) {
 
             Ink.Parsed.Object? possibleChoice = text?.parent?.parent;
-            return possibleChoice is Ink.Parsed.Choice;
+            if (possibleChoice is Ink.Parsed.Choice) {
+                var choice = (Ink.Parsed.Choice)possibleChoice;
+                if (text?.parent == choice.choiceOnlyContent)
+                    return true;
+            }
+            return false;
         }
 
         private int? GetLineIdx(Text text) {
