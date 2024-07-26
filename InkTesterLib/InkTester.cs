@@ -107,6 +107,7 @@ namespace InkTester
                 return false;
 
             story.onError += OnError;
+            story.allowExternalFunctionFallbacks = true;
 
             Console.WriteLine($"Starting {_options.testRuns} runs...");
 

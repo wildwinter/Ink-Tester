@@ -1,16 +1,20 @@
 ﻿INCLUDE included1.ink
 INCLUDE inc/included2.ink
 
-VAR Testing = false
-
-{Testing:
-    We are testing!
-}
+VAR TEST_RUN = false
 
 -> Intro
 
-=== Intro
+EXTERNAL TestFn()
+=== function TestFn() ===
+~ return true
 
+=== Intro
+{TEST_RUN:
+    We are testing!
+}
+
+~ TestFn()
 Test Line 1
 Test Line 2
 * [Branch 1]
