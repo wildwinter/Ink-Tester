@@ -1,6 +1,6 @@
-using System;
 using System.Text.RegularExpressions;
 using Ink;
+using Ink.Parsed;
 using Ink.Runtime;
 
 namespace InkTester
@@ -28,8 +28,12 @@ namespace InkTester
 
         private IFileHandler _fileHandler = new DefaultFileHandler();
         private bool _inkErrors = false;
-        private int _oocLine = -1;
-        private string _oocFile = "";
+
+        private int _lastValidLineNum = -1;
+        private string _lastValidFile = "";
+        private string _lastValidText = "";
+
+        private bool _oocError = false;
 
         private string _previousCWD="";
 
@@ -111,13 +115,16 @@ namespace InkTester
             tagger.Tag(parsedStory);
 
             // Convert the parsed story into a runtime story.
-            Story story = parsedStory.ExportRuntime(OnError);
+            Ink.Runtime.Story story = parsedStory.ExportRuntime(OnError);
 
             if (story == null)
                 return false;
 
             story.onError += OnError;
             story.allowExternalFunctionFallbacks = true;
+
+            OOCLog.Clear();
+            VisitLog.Clear();
 
             Console.WriteLine($"Starting {_options.testRuns} runs...");
 
@@ -183,15 +190,17 @@ namespace InkTester
             return true;
         }
 
-        private bool TestRun(Story story, LineTagger tagger, int runNum, Dictionary<string, HashSet<int>> runVisitLog) {
+        private bool TestRun(Ink.Runtime.Story story, LineTagger tagger, int runNum, Dictionary<string, HashSet<int>> runVisitLog) {
 
             Console.WriteLine($"Test run {runNum+1}...");
 
             int steps = 0;
             
             // Clear the out-of-content error
-            _oocLine = -1;
-            _oocFile = "";
+            _oocError = false;
+
+            _lastValidLineNum = -1;
+            _lastValidFile = "";
 
             while (story.canContinue) {
                 
@@ -209,36 +218,28 @@ namespace InkTester
                     }
                     steps++;
 
-                    var text = story.Continue();
-                    if (_options.ooc && _oocLine>=0) {
+                    string text = story.Continue();
 
-                        // We hit an Out of Content error. Log it, bail out early.
-                        if (!runVisitLog.ContainsKey(_oocFile)) {
-                            // This file needs adding to the log
-                            var newFileVisitLog=new HashSet<int>();
-                            runVisitLog[_oocFile]=newFileVisitLog;
-                        }
-                        runVisitLog[_oocFile].Add(_oocLine);
+                    if (_options.ooc && _oocError)
                         return true;
-                    }
 
+                    var tags = story.currentTags;
+                    // Use the tag we stuck into that line to get the parsed version of the object
+                    // We could have used debugMetadata in runtime but it's flaky in the runtime version and can be wrong
+                    var pObj = tagger.GetParsedObjectFromTags(tags);
+                    if (pObj!=null) {
 
-                    if (!_options.ooc) {    // Skip if we're doing an OOC run
-                        var tags = story.currentTags;
-                        // Use the tag we stuck into that line to get the parsed version of the object
-                        // We could have used debugMetadata in runtime but it's flaky in the runtime version and can be wrong
-                        var pObj = tagger.GetParsedObjectFromTags(tags);
-                        if (pObj!=null) {
+                        _lastValidLineNum = pObj.debugMetadata.startLineNumber;
+                        _lastValidFile = pObj.debugMetadata.fileName;
+                        _lastValidText = text;
 
-                            int lineNumber = pObj.debugMetadata.startLineNumber;
-                            string fileName = pObj.debugMetadata.fileName;
-
-                            if (!runVisitLog.ContainsKey(fileName)) {
+                        if (!_options.ooc) {
+                            if (!runVisitLog.ContainsKey(_lastValidFile)) {
                                 // This file needs adding to the log
                                 var newFileVisitLog=new HashSet<int>();
-                                runVisitLog[fileName]=newFileVisitLog;
+                                runVisitLog[_lastValidFile]=newFileVisitLog;
                             }
-                            runVisitLog[fileName].Add(lineNumber);
+                            runVisitLog[_lastValidFile].Add(_lastValidLineNum);
                         }
                     }
 
@@ -269,22 +270,28 @@ namespace InkTester
                 Console.Error.WriteLine("Ink Warning: "+message);
                 return;
             }
-            if (message.Contains("ran out of content.") && _options.ooc){
 
-                string pattern = @"'(?<filename>.+)' line (?<lineNumber>\d+):";
-        
-                // Use Regex to match the pattern in the error message
-                Regex regex = new Regex(pattern);
-                Match match = regex.Match(message);
+            if (_options.ooc && (message.Contains("ran out of content.") || message.Contains("end of content."))){
 
-                if (match.Success)
+                _oocError = true;
+
+                // We hit an Out of Content error. Log it, bail out early.
+                var oocEntry = new OOCEntry {
+                    ErrorText = message.Substring("RUNTIME ERROR: ".Length).Trim(),
+                    LastGoodFileName = _lastValidFile,
+                    LastGoodLineNumber = _lastValidLineNum,
+                    LastGoodText = _lastValidText.Trim()
+                };
+                if (!OOCLog.Any(entry => 
+                    entry.ErrorText == oocEntry.ErrorText &&
+                    entry.LastGoodFileName == oocEntry.LastGoodFileName &&
+                    entry.LastGoodLineNumber == oocEntry.LastGoodLineNumber &&
+                    entry.LastGoodText == oocEntry.LastGoodText))
                 {
-                    // Extract the filename and line number from the match groups
-                    _oocFile = match.Groups["filename"].Value;
-                    _oocLine = int.Parse(match.Groups["lineNumber"].Value);
-
-                    return; // Don't treat it as an error, return to the loop which will log it and exit the run.
+                    OOCLog.Add(oocEntry);
                 }
+
+                return; // Don't treat it as an error, return to the loop which will log it and exit the run.
             }
             _inkErrors = true;
             Console.Error.WriteLine("Ink Error: "+message);
@@ -299,6 +306,15 @@ namespace InkTester
             public float PercentageVisits { get; set; }
         }
         public List<VisitEntry> VisitLog = new();
+
+        public class OOCEntry {
+            public required string ErrorText {get; set;}
+            public required string LastGoodFileName {get; set;}
+            public int LastGoodLineNumber {get;set;}
+            public required string LastGoodText {get;set;}
+        }
+        public List<OOCEntry> OOCLog = new();
+
         private Dictionary<string, string[]> _buildFileContent = new();
 
         // After it's all over, collate the log into something readable.

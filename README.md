@@ -27,7 +27,7 @@ This tool can also be run in **out-of-content check** mode. Instead of recording
 
 `Ink Error: RUNTIME ERROR: 'outofcontent.ink' line 14: ran out of content. Do you need a '-> DONE' or '-> END'?`
 
-If it finds any errors like this it will report them, and write out the places where this happens into a CSV file. **Note that in this mode it doesn't do a normal visit check.**
+If it finds any errors like this it will report them, and write them out into a CSV file, along with the last good content it found. **Note that in this mode it doesn't do a normal visit check.**
 
 ## Command-Line Tool
 This is a command-line utility with a few arguments. A few simple examples:

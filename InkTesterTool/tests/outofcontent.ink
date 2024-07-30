@@ -6,10 +6,15 @@
     ->NewPlace
 * [Here is another option]
     Clicked second option!
+    -> Goaway
 * [Here is a third option]
     The third option!
+    -> Goaway
 -
--> Intro
+{false:
+    -> END
+}
+
 
 === NewPlace
 * [Separate thing.]
@@ -19,4 +24,8 @@
 * [Seperate thing 3]
     Content!
 -
+-> Intro
+
+=== Goaway
+Here now.
 -> Intro

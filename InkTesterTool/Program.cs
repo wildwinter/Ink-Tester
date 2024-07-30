@@ -72,20 +72,29 @@ if (!tester.Run()) {
 Console.WriteLine($"Tested.");
 
 if (options.ooc) {
-    if (tester.VisitLog.Count==0) {
+    if (tester.OOCLog.Count==0) {
         Console.WriteLine("No out-of-content errors found, all good! Report not written.");
         return 0;
     }
-    Console.WriteLine($"{tester.VisitLog.Count} out-of-content errors found! See report.");
+    Console.WriteLine($"{tester.OOCLog.Count} out-of-content errors found! See report.");
 }
 
 // ----- CSV Output -----
 if (!String.IsNullOrEmpty(csvOptions.outputFilePath)) {
     var csvHandler = new CSVHandler(tester, csvOptions);
 
-    if (!csvHandler.WriteReport(options.ooc)) {
-        Console.Error.WriteLine("Report not written.");
-        return -1;
+    if (options.ooc)
+    {
+        if (!csvHandler.WriteOOCReport()) {
+            Console.Error.WriteLine("Report not written.");
+            return -1;
+        }
+    }
+    else {
+         if (!csvHandler.WriteReport()) {
+            Console.Error.WriteLine("Report not written.");
+            return -1;
+        }
     }
     Console.WriteLine($"CSV file written: {csvOptions.outputFilePath}");
 }
