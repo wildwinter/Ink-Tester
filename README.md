@@ -73,6 +73,11 @@ Run an out-of-content check to report.csv instead.\
     e.g. `--maxSteps=1000`\
     Default is 10000, to avoid infinite loops - but when using default, an error will be reported and testing will cease. If you specify your own maxSteps, this won't error.
 
+* `--maxChoices=<num>`
+
+    If this is >=0, limits the number of choices tested at each choice point. This is useful to emulate a UI which only shows a limited set of choices at any one time. This assumes it's drawing from the top.\
+    e.g. `--maxChoices=3` means 'only test the first 3 of every set of choices'\
+
 * `--ooc`
     
     Run an out-of-content check, instead of the normal coverage check.

@@ -7,7 +7,8 @@ namespace InkTester
 {
     public class Tester {
 
-        public class Options {
+        public class Options
+        {
             // Root folder. If empty, uses current working dir.
             public string folder = "";
             // File to test. Will automatically use all includes.
@@ -22,6 +23,8 @@ namespace InkTester
             public bool maxStepsErrors = true;
             // Running in Out of Content mode
             public bool ooc = false;
+            // If set, limits the number of choices to this number
+            public int maxChoices = -1;
         }
         private Options _options;
 
@@ -255,7 +258,10 @@ namespace InkTester
                 }
 
                 // Pick a random choice!
-                story.ChooseChoiceIndex(_random.Next(story.currentChoices.Count));
+                int choiceCount = story.currentChoices.Count;
+                if (_options.maxChoices>0 && choiceCount>_options.maxChoices)
+                    choiceCount = _options.maxChoices;
+                story.ChooseChoiceIndex(_random.Next(choiceCount));
             }
 
             return !_inkErrors;

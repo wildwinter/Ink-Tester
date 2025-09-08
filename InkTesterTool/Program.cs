@@ -16,13 +16,17 @@ foreach (var arg in args)
         options.testRuns = int.Parse(arg.Substring(7));
     else if (arg.StartsWith("--csv="))
         csvOptions.outputFilePath = arg.Substring(6);
+    else if (arg.StartsWith("--maxChoices="))
+        options.maxChoices = int.Parse(arg.Substring(13));
     else if (arg.StartsWith("--ooc"))
-        options.ooc=true;
-    else if (arg.StartsWith("--maxSteps=")) {
+        options.ooc = true;
+    else if (arg.StartsWith("--maxSteps="))
+    {
         options.maxSteps = int.Parse(arg.Substring(11));
         options.maxStepsErrors = false; // Changing the default stops this being reported as an error.
     }
-    else if (arg.Equals("--help") || arg.Equals("-h")) {
+    else if (arg.Equals("--help") || arg.Equals("-h"))
+    {
         Console.WriteLine("Ink Tester");
         Console.WriteLine("Arguments:");
         Console.WriteLine("  --folder=<folder> - Root working folder for Ink files, relative to current working dir.");
@@ -31,8 +35,8 @@ foreach (var arg in args)
         Console.WriteLine("  --storyFile=<file> - Ink file to test.");
         Console.WriteLine("                       e.g. --storyFile=start.ink");
         Console.WriteLine("  --runs=<num> - How many times to run the randomized test.");
-        Console.WriteLine("                 e.g. --runs=1000");  
-        Console.WriteLine("                 Default is 100.");      
+        Console.WriteLine("                 e.g. --runs=1000");
+        Console.WriteLine("                 Default is 100.");
         Console.WriteLine("  --csv=<csvFile> - Path to a CSV file to export, relative to working dir.");
         Console.WriteLine("                    e.g. --csv=output/report.csv");
         Console.WriteLine("                    Default is empty, so no CSV file will be generated.");
@@ -41,19 +45,23 @@ foreach (var arg in args)
         Console.WriteLine("  --maxSteps=<num> - How many steps to allow your ink story to take before ending. This avoids infinite loops and deals with stories that don't have an explicit ->END.");
         Console.WriteLine("                    e.g. --maxSteps=1000");
         Console.WriteLine("                    Default is 10000, to avoid infinite loops - but when using default, an error will be reported and testing will cease. If you specify your own maxSteps, this won't error.");
+        Console.WriteLine("  --maxChoices=<num> - Limits the number of choices to this number. Useful if your interface will only show the top N of choices.");
+        Console.WriteLine("                      e.g. --maxChoices=3");
+        Console.WriteLine("                      Default is -1, which means no limit.");
         Console.WriteLine("  --ooc - Run an out-of-content check, instead of the normal coverage check.");
-  
+
         return 0;
     }
-    else if (arg.Equals("--test")) { // Internal testing, for dev. Not to be confused with testVar.
-        options.folder="tests";
-        options.storyFile="test.ink";
+    else if (arg.Equals("--test"))
+    { // Internal testing, for dev. Not to be confused with testVar.
+        options.folder = "tests";
+        options.storyFile = "test.ink";
         options.testRuns = 1000;
         //options.ooc = true;
         //options.maxSteps = 1000;
         //options.maxStepsErrors = false;
         //options.testVar = "Testing";
-        csvOptions.outputFilePath="tests/report.csv";
+        csvOptions.outputFilePath = "tests/report.csv";
     }
 }
 
