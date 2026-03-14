@@ -2,7 +2,7 @@
 
 rm -rf ./publish/*
 
-version="0.0.5.0"
+version="0.0.5.1"
 targets=("osx-arm64" "osx-x64" "win-x86" "win-x64")
 
 for target in "${targets[@]}"; do
@@ -15,6 +15,15 @@ for target in "${targets[@]}"; do
     cp ./LICENSE ./publish/${target}
     cp ./README.md ./publish/${target}
     cp -r ./docs ./publish/${target}
+
+    # Code-sign macOS binaries before zipping
+    if [[ "$target" == osx-* ]]; then
+        echo "Signing ${target}..."
+        codesign --deep --force --verify --verbose \
+            --sign "${APPLE_CODESIGN_ID}" \
+            --options runtime \
+            ./publish/${target}/InkTesterTool
+    fi
 
     cd ./publish/${target}
     zip -r "../InkTesterTool-${target}-${version}".zip .

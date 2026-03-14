@@ -3,11 +3,13 @@
 **A simple tool to test an Ink story.**
 
 ## Contents
+
 - [Overview](#overview)
 - [Command-Line Tool](#command-line-tool)
 - [Releases](#releases)
 - [FAQ](#faq)
 - [Caveats](#caveats)
+- [Security Issues](#security-issues)
 - [Under the Hood](#under-the-hood)
 - [Acknowledgements](#acknowledgements)
 - [License and Attribution](#license-and-attribution)
@@ -44,6 +46,8 @@ Set the Ink variable TEST_MODE to true, run the tool on the file Main.ink in the
 Run an out-of-content check to report.csv instead.\
 `InkTesterTool.exe --storyFile=Main.ink --csv=output/report.csv --ooc`
 
+*Is the utility failing to run on Windows? Check the [security issues](#security-issues) note here.*
+
 ### Arguments
 
 * `--folder=<folder>`
@@ -79,7 +83,7 @@ Run an out-of-content check to report.csv instead.\
     e.g. `--maxChoices=3` means 'only test the first 3 of every set of choices'\
 
 * `--ooc`
-    
+
     Run an out-of-content check, instead of the normal coverage check.
 
 * `--help`
@@ -87,6 +91,7 @@ Run an out-of-content check to report.csv instead.\
     This help!
 
 ## Releases
+
 You can find releases for various platforms [here](https://github.com/wildwinter/Ink-Tester/releases
 ).
 
@@ -104,19 +109,43 @@ will be.
 For each run, the tool simply records if a line has been visited or not. Then it aggregates that data over all the runs. If you visit a line multiple times in one run, that's still only counted as - yep, visited.
 
 ## Caveats
+
 This isn't very complicated or sophisticated, so your mileage may vary!
 
+## Security Issues
+
+### Note on Windows Security
+
+Because this is a hobbyist project, this app is **currently not digitally signed*** for Windows. If you receive an "Access Denied" or "Unauthorized" error when running this tool in PowerShell/CMD:
+
+1. Right-click the EXE in File Explorer.
+
+2. Select Properties.
+
+3. At the bottom, check the Unblock box and click OK.
+
+Try running the command again.
+
+\* *Because it costs a lot and seems to be impossible outside North America right now for individual developers. Thanks Microsoft!*
+
+### Note on Mac Security
+
+The app is signed. Because it's easier on Mac.
+
 ## Under the Hood
+
 Developed in .NET / C#.
 
 The tool internally uses Inkle's **Ink Parser** to accurately find relevant lines of content, and **Ink Runtime** to run the story.
 
 ## Acknowledgements
+
 Obviously, huge thanks to [Inkle](https://www.inklestudios.com/) (and **Joseph Humfrey** in particular) for [Ink](https://www.inklestudios.com/ink/) and the ecosystem around it, it's made my life way easier.
 
 Thanks to **Dan Fabulich** of [Choice of Games](https://www.choiceofgames.com/) for the idea - he developed a similar tool for testing ChoiceScript and I've always found that concept useful.
 
 ## License and Attribution
+
 This is licensed under the MIT license - you should find it in the root folder. If you're successfully or unsuccessfully using this tool, I'd love to hear about it!
 
 You can find me [on Medium, here](https://wildwinter.medium.com/).
